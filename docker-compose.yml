@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+    image: nginx:latest
+    container_name: eight25-nginx
+    ports:
+      - "3000:80"
+    volumes:
+      - ./public:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Mount custom Nginx config
+    restart: always
