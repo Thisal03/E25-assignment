@@ -1,0 +1,102 @@
+Apache Virtual Host Configuration
+
+
+1. Create the configuration file
+
+Create a new configuration file in Apache's sites-available directory:
+sudo nano /etc/apache2/sites-available/eight25-internship-assessment.conf
+
+
+2. Add the virtual host Configuration
+
+<VirtualHost *:80>
+    ServerName eight25-internship-assessment.test
+    ServerAlias www.eight25-internship-assessment.test
+    
+    DocumentRoot /var/www/eight25-internship-assessment/public
+    
+    ErrorLog ${APACHE_LOG_DIR}/eight25-error.log
+    CustomLog ${APACHE_LOG_DIR}/eight25-access.log combined
+    
+    <Directory /var/www/eight25-internship-assessment/public>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+        
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^ index.html [QSA,L]
+    </Directory>
+</VirtualHost>
+
+
+3. Enable the site and restart Apache
+
+Enable the site
+sudo a2ensite eight25-internship-assessment.conf
+
+Disable default site if enabled
+sudo a2dissite 000-default.conf
+
+Test configuration
+sudo apache2ctl configtest
+
+Restart Apache
+sudo systemctl restart apache2
+
+
+
+Nginx Virtual Host Configuration
+
+
+1. Create the configuration file
+
+Create a new configuration file in Nginx's sites-available directory:
+sudo nano /etc/nginx/sites-available/eight25-internship-assessment
+
+
+2. Add the virtual host configuration
+
+server {
+    listen 80;
+    listen [::]:80;
+    
+    # Domain names
+    server_name eight25-internship-assessment.test www.eight25-internship-assessment.test;
+    
+    # Root directory
+    root /var/www/eight25-internship-assessment/public;
+    index index.html index.htm;
+    
+    # Log files
+    access_log /var/log/nginx/eight25-access.log;
+    error_log /var/log/nginx/eight25-error.log;
+    
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, no-transform";
+        access_log off;
+    }
+    
+    # Deny access to hidden files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
+3. Enable the site and restart Nginx
+
+Create symbolic link to sites-enabled
+sudo ln -s /etc/nginx/sites-available/eight25-internship-assessment /etc/nginx/sites-enabled/
+
+Test configuration
+sudo nginx -t
+
+Restart Nginx
+sudo systemctl restart nginx
